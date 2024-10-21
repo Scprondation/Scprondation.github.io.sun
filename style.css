@@ -1,11 +1,17 @@
-body {
-  font-family: sans-serif;
+ @import url(https://fonts.googleapis.com/css?family=Rubik+One&subset=latin,cyrillic);
+.ok {
+  
+}
+body {  
+  font-family: 'Rubik One', sans-serif; 
   background-color: #222;
   color: #eee;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  resize: none;   
+  touch-action: manipulation;
 }
 
 #container {
@@ -19,7 +25,7 @@ body {
 }
 
 #progress-bar {
-  width: 300px;
+  width: 50vw;
   height: 20px;
   background-color: #444;
   border-radius: 5px;
@@ -40,20 +46,18 @@ body {
 }
 
 #click-circle {
-  width: 300px;
-  height: 300px;
+  width: 100vw;
+  height: 100vw;
   border-radius: 50%;
   background: radial-gradient(#ff892a, #ff9e55);
   cursor: pointer;
   box-shadow: 0 0 10px #ff7300;
-}
-body {
-  /* ... (предыдущий CSS) ... */
+  
 }
 
 #click-circle {
-  width: 300px;
-  height: 300px;
+  width: 50vw;
+  height: 50vw;
   border-radius: 50%;
   background-color: #007bff;
   cursor: pointer;
@@ -63,24 +67,28 @@ body {
   font-size: 2em;
   color: #fff;
   transition: transform 0.07s ease; /* Добавляем переход для анимации */
+    -webkit-touch-callout:none;               
+        -webkit-text-size-adjust:none;          
+        -webkit-tap-highlight-color:rgba(0,0,0,0);
+        -webkit-user-select:none;   
 }
 
 #click-circle:active {
   transform: scale(0.95); /* Уменьшаем размер при нажатии */
 #shop {
-  margin-top: 200px;
+  margin-top: 100vw;
 }
 
-.item {
-  margin-bottom: 100px;
-  padding: 50px 50px;
+ buttun {
+  margin-bottom: 60vw;
+  padding: 50vw 50vw;
   border-radius: 15px;
   background-color: #444; /* Темно-серый цвет */
   color: #fff; /* Белый текст */
   cursor: pointer;
   border: none; /* Убираем стандартную рамку */
   font-family: 'Arial', sans-serif; /* Выбираем шрифт */
-  font-size: 1.2em; /* Увеличиваем размер шрифта */
+  font-size: 2.6em; /* Увеличиваем размер шрифта */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Добавляем тень */
   transition: background-color 0.3s ease; /* Добавляем плавный переход */
-}
+ }
