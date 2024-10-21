@@ -44,7 +44,7 @@ function buyItem(item) {
     item.dataset.price = price * 2; // Увеличиваем цену для следующей покупки
     updateProgressBar();
   } else {
-    alert('Недостаточно кликов!');
+    navigator.vibrate(200);
   }
 }
 
