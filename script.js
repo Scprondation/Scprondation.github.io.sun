@@ -17,12 +17,30 @@ function updateProgressBar() {
   progressBar.style.width = progressWidth + '%';
 }
 
+// Функция для сохранения игры
+function saveGame() {
+  localStorage.setItem('clicks', clicks);
+  localStorage.setItem('clicksNeeded', clicksNeeded);
+  localStorage.setItem('clickBonus', clickBonus);
+}
+
+// Функция для загрузки игры
+function loadGame() {
+  clicks = parseInt(localStorage.getItem('clicks')) || 0;
+  clicksNeeded = parseInt(localStorage.getItem('clicksNeeded')) || 100;
+  clickBonus = parseInt(localStorage.getItem('clickBonus')) || 1;
+  updateCounter();
+  updateProgressBar();
+}
+
+// Вызываем функцию загрузки игры при загрузке страницы
+
 // Функция обработки клика по кругу
 clickCircle.addEventListener('click', () => {
   clicks += clickBonus; // Добавляем бонусные клики
   updateCounter();
   updateProgressBar();
-
+  saveGame();
   // Проверка на достижение цели
   if (clicks >= clicksNeeded) {
     clicksNeeded *= 5;
