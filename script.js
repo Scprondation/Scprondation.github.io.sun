@@ -76,7 +76,7 @@ function loadGame() {
 
 clickCircle.addEventListener('click', () => {
 
-  clicks += clickBonus; // Добавляем бонусные клики
+  clicks += 1+clickBonus; // Добавляем бонусные клики
 
   updateCounter();
 
