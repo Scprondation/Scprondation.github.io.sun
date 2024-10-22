@@ -12,6 +12,10 @@ body {
   min-height: 100vh;
   resize: none;   
   touch-action: manipulation;
+        -webkit-touch-callout:none;               
+        -webkit-text-size-adjust:none;          
+        -webkit-tap-highlight-color:rgba(0,0,0,0);
+        -webkit-user-select:none;   
 }
 
 #container {
@@ -35,7 +39,6 @@ body {
 }
 
 #progress {
-  image: url("Images/Без названия70_20241021163701.png");
   height: 100%;
   background: linear-gradient(to right, #ff892a, #ffb380); 
   border-radius: 5px;
@@ -75,21 +78,32 @@ body {
 }
 
 #click-circle:active {
-  transform: scale(0.95); /* Уменьшаем размер при нажатии */
-#shop {
-  margin-top: 100vw;
+
+  transform: scale(0.95); /* Уменьшаем размер при нажатии */}
+  
+ .buy-button {
+  background-color: #007bff; /* Синий цвет фона */
+  color: white; /* Белый цвет текста */
+  padding: 8px 16px; /* Отступы для текста */
+  border: none; /* Убираем рамку */
+  border-radius: 4px; /* Скругленные углы */
+  cursor: pointer; /* Курсор в виде указательной руки */
+  margin-left: 10px; /* Отступ слева для визуальной разметки */
+  transition: background-color 0.2s ease; /* Плавный переход цвета фона */
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Добавляем тень */
 }
 
- buttun {
-  margin-bottom: 60vw;
-  padding: 50vw 50vw;
-  border-radius: 15px;
-  background-color: #444; /* Темно-серый цвет */
-  color: #fff; /* Белый текст */
-  cursor: pointer;
-  border: none; /* Убираем стандартную рамку */
-  font-family: 'Arial', sans-serif; /* Выбираем шрифт */
-  font-size: 2.6em; /* Увеличиваем размер шрифта */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Добавляем тень */
-  transition: background-color 0.3s ease; /* Добавляем плавный переход */
- }
+.buy-button:hover {
+  background-color: #ff892a; /* Оранжевый цвет при наведении */
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4); /* Более сильная тень */
+}
+
+.buy-button:active {
+  background-color: #ff9e55; /* Более светлый оранжевый цвет при нажатии */
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6); /* Еще более сильная тень */
+}
+
+.buy-button.disabled {
+  background-color: #ccc; /* Серый цвет фона */
+  cursor: not-allowed; /* Запрещенный курсор */
+}
