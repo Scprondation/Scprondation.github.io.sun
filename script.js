@@ -24,10 +24,12 @@ class ClickerGame {
     this.achievements = {};
     this.items = {};
     this.userId = null;
+    this.userName = null;
     this.isLoading = true;
     this.leaderboardFilter = 'clicks';
     this.leaderboardData = [];
     this.myRank = null;
+    this.isTelegramUser = false;
     
     this.init();
   }
@@ -51,15 +53,25 @@ class ClickerGame {
   }
   
   async setupUser() {
-    // Получаем ID пользователя Telegram
+    // Пытаемся получить данные Telegram пользователя
     if (window.Telegram && window.Telegram.WebApp) {
       const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
+      
       if (tgUser && tgUser.id) {
+        // Пользователь из Telegram
         this.userId = `tg_${tgUser.id}`;
+        this.userName = tgUser.first_name || tgUser.username || 'Telegram User';
+        this.isTelegramUser = true;
+        
+        // Инициализируем Telegram Web App
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+        
+        console.log('Telegram user detected:', tgUser);
       }
     }
     
-    // Если нет Telegram ID, создаем локальный ID
+    // Если не Telegram пользователь, создаем локальный аккаунт
     if (!this.userId) {
       let localUserId = localStorage.getItem('clickerUserId');
       if (!localUserId) {
@@ -67,33 +79,44 @@ class ClickerGame {
         localStorage.setItem('clickerUserId', localUserId);
       }
       this.userId = localUserId;
+      this.userName = 'Локальный игрок';
+      this.isTelegramUser = false;
     }
     
-    // Загружаем данные пользователя из Firebase
+    // Загружаем данные пользователя
     await this.loadUserData();
   }
   
   async loadUserData() {
     try {
-      const doc = await db.collection('users').doc(this.userId).get();
-      
-      if (doc.exists) {
-        const data = doc.data();
-        this.clicks = data.clicks || 0;
-        this.coins = data.coins || 0;
-        this.level = data.level || 1;
-        this.clickPower = data.clickPower || 1;
-        this.autoClickers = data.autoClickers || 0;
-        this.achievements = data.achievements || {};
-        this.cps = data.cps || 0;
-        this.items = data.items || {};
+      // Для Telegram пользователей загружаем из Firebase
+      if (this.isTelegramUser) {
+        const doc = await db.collection('users').doc(this.userId).get();
         
-        // Восстанавливаем уровни предметов
-        this.restoreItemLevels();
+        if (doc.exists) {
+          const data = doc.data();
+          this.clicks = data.clicks || 0;
+          this.coins = data.coins || 0;
+          this.level = data.level || 1;
+          this.clickPower = data.clickPower || 1;
+          this.autoClickers = data.autoClickers || 0;
+          this.achievements = data.achievements || {};
+          this.cps = data.cps || 0;
+          this.items = data.items || {};
+          
+          console.log('Loaded from Firebase:', data);
+        } else {
+          // Создаем нового пользователя в Firebase
+          await this.saveUserData();
+        }
       } else {
-        // Создаем нового пользователя
-        await this.saveUserData();
+        // Для локальных пользователей загружаем из localStorage
+        this.loadFromLocalStorage();
       }
+      
+      // Восстанавливаем уровни предметов
+      this.restoreItemLevels();
+      
     } catch (error) {
       console.error('Error loading user data:', error);
       // В случае ошибки загружаем из localStorage
@@ -104,6 +127,9 @@ class ClickerGame {
   async saveUserData() {
     try {
       const userData = {
+        userId: this.userId,
+        userName: this.userName,
+        isTelegramUser: this.isTelegramUser,
         clicks: this.clicks,
         coins: this.coins,
         level: this.level,
@@ -112,14 +138,21 @@ class ClickerGame {
         achievements: this.achievements,
         cps: this.cps,
         items: this.items,
-        playerName: this.getPlayerName(this.userId),
-        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+        lastPlayed: new Date().toISOString()
       };
       
-      await db.collection('users').doc(this.userId).set(userData, { merge: true });
+      // Для Telegram пользователей сохраняем в Firebase
+      if (this.isTelegramUser) {
+        await db.collection('users').doc(this.userId).set(userData, { merge: true });
+        console.log('Saved to Firebase');
+      }
+      
+      // Всегда сохраняем в localStorage для резервной копии
+      this.saveToLocalStorage();
+      
     } catch (error) {
       console.error('Error saving user data:', error);
-      // В случае ошибки сохраняем в localStorage
       this.saveToLocalStorage();
     }
   }
@@ -133,7 +166,8 @@ class ClickerGame {
       autoClickers: this.autoClickers,
       achievements: this.achievements,
       cps: this.cps,
-      items: this.items
+      items: this.items,
+      userName: this.userName
     };
     localStorage.setItem('clickerGameData', JSON.stringify(gameData));
   }
@@ -150,13 +184,13 @@ class ClickerGame {
       this.achievements = gameData.achievements || {};
       this.cps = gameData.cps || 0;
       this.items = gameData.items || {};
+      this.userName = gameData.userName || 'Локальный игрок';
       
-      this.restoreItemLevels();
+      console.log('Loaded from localStorage');
     }
   }
   
   restoreItemLevels() {
-    // Восстанавливаем уровни предметов из сохраненных данных
     document.querySelectorAll('.shop-item').forEach(item => {
       const basePrice = parseInt(item.dataset.price);
       const type = item.dataset.type;
@@ -333,7 +367,6 @@ class ClickerGame {
     }
   }
 
-  // Метод для смены фильтра лидерборда
   changeLeaderboardFilter(filter) {
     this.leaderboardFilter = filter;
     
@@ -347,7 +380,6 @@ class ClickerGame {
     this.sortAndDisplayLeaderboard();
   }
 
-  // Загрузка данных лидерборда
   async loadLeaderboard() {
     try {
       const leaderboardItems = document.getElementById('leaderboard-items');
@@ -390,7 +422,6 @@ class ClickerGame {
     }
   }
 
-  // Поиск своего места в рейтинге
   findMyRank() {
     const sortedData = [...this.leaderboardData].sort((a, b) => b.clicks - a.clicks);
     this.myRank = sortedData.findIndex(player => player.id === this.userId) + 1;
@@ -401,7 +432,7 @@ class ClickerGame {
       myRankElement.innerHTML = `
         <div class="my-rank-item">
           <div class="rank">${this.myRank}</div>
-          <div class="player">Вы</div>
+          <div class="player">${this.userName}</div>
           <div class="score">${myData.clicks.toLocaleString()}</div>
           <div class="level">${myData.level || 1}</div>
         </div>
@@ -411,7 +442,6 @@ class ClickerGame {
     }
   }
 
-  // Сортировка и отображение лидерборда
   sortAndDisplayLeaderboard() {
     const sortedData = [...this.leaderboardData];
     
@@ -449,7 +479,7 @@ class ClickerGame {
       item.innerHTML = `
         <div class="rank ${rank <= 3 ? `top-${rank}` : ''}">${rank}</div>
         <div class="player">
-          ${isCurrentUser ? '👤 Вы' : this.getPlayerName(player.id)}
+          ${isCurrentUser ? '👤 ' : ''}${player.userName || 'Аноним'}
           ${rank === 1 ? '👑' : ''}
         </div>
         <div class="score">${this.getPlayerScore(player)}</div>
@@ -460,17 +490,6 @@ class ClickerGame {
     });
   }
 
-  // Получение имени игрока
-  getPlayerName(userId) {
-    if (userId.startsWith('tg_')) {
-      return `Игрок ${userId.substring(3, 7)}`;
-    } else if (userId.startsWith('local_')) {
-      return `Игрок ${userId.substring(6, 10)}`;
-    }
-    return 'Аноним';
-  }
-
-  // Получение счета игрока в зависимости от фильтра
   getPlayerScore(player) {
     switch (this.leaderboardFilter) {
       case 'clicks':
@@ -607,11 +626,7 @@ class ClickerGame {
   }
   
   async saveGame() {
-    // Сохраняем в Firebase
     await this.saveUserData();
-    
-    // Дублируем в localStorage для надежности
-    this.saveToLocalStorage();
   }
 }
 
