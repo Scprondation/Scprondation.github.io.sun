@@ -1,14 +1,12 @@
-// script.js
-// Firebase configuration
+// Firebase configuration - ЗАМЕНИТЕ НА ВАШУ КОНФИГУРАЦИЮ
 const firebaseConfig = {
-    apiKey: "AIzaSyCUXW9TZ7oV4kXLEjgupYIKmdrXJAqM_aA",
-    authDomain: "suns-2264b.firebaseapp.com",
-    projectId: "suns-2264b",
-    storageBucket: "suns-2264b.firebasestorage.app",
-    messagingSenderId: "390208772280",
-    appId: "1:390208772280:web:acdaa3725fc43a2c87bc4d",
-    measurementId: "G-YV5XD309R4"
-  };
+  apiKey: "your-api-key",
+  authDomain: "your-project.firebaseapp.com",
+  projectId: "your-project-id",
+  storageBucket: "your-project.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "your-app-id"
+};
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
@@ -27,6 +25,9 @@ class ClickerGame {
     this.items = {};
     this.userId = null;
     this.isLoading = true;
+    this.leaderboardFilter = 'clicks';
+    this.leaderboardData = [];
+    this.myRank = null;
     
     this.init();
   }
@@ -111,6 +112,7 @@ class ClickerGame {
         achievements: this.achievements,
         cps: this.cps,
         items: this.items,
+        playerName: this.getPlayerName(this.userId),
         lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
       };
       
@@ -194,6 +196,21 @@ class ClickerGame {
         const item = e.target.closest('.shop-item');
         this.buyItem(item);
       });
+    });
+
+    // Фильтры лидерборда
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const filter = e.currentTarget.dataset.filter;
+        this.changeLeaderboardFilter(filter);
+      });
+    });
+
+    // Обновление лидерборда при открытии вкладки
+    document.querySelector('[data-tab="leaderboard-tab"]').addEventListener('click', () => {
+      setTimeout(() => {
+        this.loadLeaderboard();
+      }, 100);
     });
   }
   
@@ -313,6 +330,157 @@ class ClickerGame {
       // Вибрация при недостатке монет
       if (navigator.vibrate) navigator.vibrate(200);
       this.showFloatingText('Недостаточно монет!', item);
+    }
+  }
+
+  // Метод для смены фильтра лидерборда
+  changeLeaderboardFilter(filter) {
+    this.leaderboardFilter = filter;
+    
+    // Обновляем активную кнопку
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+    
+    // Сортируем и отображаем лидерборд
+    this.sortAndDisplayLeaderboard();
+  }
+
+  // Загрузка данных лидерборда
+  async loadLeaderboard() {
+    try {
+      const leaderboardItems = document.getElementById('leaderboard-items');
+      leaderboardItems.innerHTML = '<div class="leaderboard-loading">Загрузка лидеров...</div>';
+      
+      const snapshot = await db.collection('users')
+        .where('clicks', '>', 0)
+        .get();
+      
+      this.leaderboardData = [];
+      let totalClicks = 0;
+      let totalPlayers = 0;
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.clicks > 0) {
+          this.leaderboardData.push({
+            id: doc.id,
+            ...data
+          });
+          totalClicks += data.clicks;
+          totalPlayers++;
+        }
+      });
+
+      // Обновляем общую статистику
+      document.getElementById('total-players').textContent = totalPlayers.toLocaleString();
+      document.getElementById('total-clicks').textContent = totalClicks.toLocaleString();
+
+      // Находим свой рейтинг
+      this.findMyRank();
+      
+      // Сортируем и отображаем
+      this.sortAndDisplayLeaderboard();
+      
+    } catch (error) {
+      console.error('Error loading leaderboard:', error);
+      document.getElementById('leaderboard-items').innerHTML = 
+        '<div class="leaderboard-error">Ошибка загрузки лидеров</div>';
+    }
+  }
+
+  // Поиск своего места в рейтинге
+  findMyRank() {
+    const sortedData = [...this.leaderboardData].sort((a, b) => b.clicks - a.clicks);
+    this.myRank = sortedData.findIndex(player => player.id === this.userId) + 1;
+    
+    const myRankElement = document.getElementById('my-rank-info');
+    if (this.myRank > 0) {
+      const myData = sortedData[this.myRank - 1];
+      myRankElement.innerHTML = `
+        <div class="my-rank-item">
+          <div class="rank">${this.myRank}</div>
+          <div class="player">Вы</div>
+          <div class="score">${myData.clicks.toLocaleString()}</div>
+          <div class="level">${myData.level || 1}</div>
+        </div>
+      `;
+    } else {
+      myRankElement.innerHTML = '<div class="no-rank">Вы еще не в рейтинге</div>';
+    }
+  }
+
+  // Сортировка и отображение лидерборда
+  sortAndDisplayLeaderboard() {
+    const sortedData = [...this.leaderboardData];
+    
+    // Сортируем по выбранному фильтру
+    switch (this.leaderboardFilter) {
+      case 'clicks':
+        sortedData.sort((a, b) => b.clicks - a.clicks);
+        break;
+      case 'level':
+        sortedData.sort((a, b) => (b.level || 1) - (a.level || 1));
+        break;
+      case 'coins':
+        sortedData.sort((a, b) => (b.coins || 0) - (a.coins || 0));
+        break;
+    }
+    
+    // Берем топ-20
+    const topPlayers = sortedData.slice(0, 20);
+    
+    // Отображаем лидерборд
+    const leaderboardItems = document.getElementById('leaderboard-items');
+    leaderboardItems.innerHTML = '';
+
+    if (topPlayers.length === 0) {
+      leaderboardItems.innerHTML = '<div class="no-data">Пока нет игроков в рейтинге</div>';
+      return;
+    }
+
+    topPlayers.forEach((player, index) => {
+      const rank = index + 1;
+      const isCurrentUser = player.id === this.userId;
+      
+      const item = document.createElement('div');
+      item.className = `leaderboard-item ${isCurrentUser ? 'current-user' : ''}`;
+      item.innerHTML = `
+        <div class="rank ${rank <= 3 ? `top-${rank}` : ''}">${rank}</div>
+        <div class="player">
+          ${isCurrentUser ? '👤 Вы' : this.getPlayerName(player.id)}
+          ${rank === 1 ? '👑' : ''}
+        </div>
+        <div class="score">${this.getPlayerScore(player)}</div>
+        <div class="level">${player.level || 1}</div>
+      `;
+      
+      leaderboardItems.appendChild(item);
+    });
+  }
+
+  // Получение имени игрока
+  getPlayerName(userId) {
+    if (userId.startsWith('tg_')) {
+      return `Игрок ${userId.substring(3, 7)}`;
+    } else if (userId.startsWith('local_')) {
+      return `Игрок ${userId.substring(6, 10)}`;
+    }
+    return 'Аноним';
+  }
+
+  // Получение счета игрока в зависимости от фильтра
+  getPlayerScore(player) {
+    switch (this.leaderboardFilter) {
+      case 'clicks':
+        return player.clicks.toLocaleString();
+      case 'level':
+        return (player.level || 1).toLocaleString();
+      case 'coins':
+        return (player.coins || 0).toLocaleString();
+      default:
+        return player.clicks.toLocaleString();
     }
   }
   
