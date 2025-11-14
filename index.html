@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -33,53 +32,7 @@
           <div id="progress-bar">
             <div id="progress"></div>
           </div>
-          <!-- Добавьте эту кнопку в #tab-bar -->
-<button class="tab-button" data-tab="leaderboard-tab">
-  <span class="tab-icon">📊</span>
-  <span class="tab-label">Лидеры</span>
-</button>
-
-<!-- Добавьте эту вкладку в #main-content -->
-<div class="tab-content" id="leaderboard-tab">
-  <div class="leaderboard-section">
-    <h3>🏆 Таблица лидеров</h3>
-    
-    <div class="leaderboard-filters">
-      <button class="filter-btn active" data-filter="clicks">По кликам</button>
-      <button class="filter-btn" data-filter="level">По уровню</button>
-      <button class="filter-btn" data-filter="coins">По монетам</button>
-    </div>
-    
-    <div class="leaderboard-list">
-      <div class="leaderboard-header">
-        <div class="rank">#</div>
-        <div class="player">Игрок</div>
-        <div class="score">Клики</div>
-        <div class="level">Уровень</div>
-      </div>
-      <div id="leaderboard-items">
-        <!-- Лидерборд будет загружаться динамически -->
-        <div class="leaderboard-loading">Загрузка лидеров...</div>
-      </div>
-    </div>
-    
-    <div class="my-rank">
-      <h4>Ваше место</h4>
-      <div id="my-rank-info">Загрузка...</div>
-    </div>
-    
-    <div class="leaderboard-stats">
-      <div class="stat">
-        <span>Всего игроков:</span>
-        <span id="total-players">0</span>
-      </div>
-      <div class="stat">
-        <span>Общее кликов:</span>
-        <span id="total-clicks">0</span>
-      </div>
-    </div>
-  </div>
-</div>
+          
           <div id="click-area">
             <div id="click-circle">
               <div class="circle-inner">
@@ -244,8 +197,73 @@
             </div>
           </div>
         </div>
+
+        <!-- Вкладка лидеров -->
+        <div class="tab-content" id="leaderboard-tab">
+          <div class="leaderboard-section">
+            <h3>🏆 Таблица лидеров</h3>
+            
+            <div class="leaderboard-filters">
+              <button class="filter-btn active" data-filter="clicks">По кликам</button>
+              <button class="filter-btn" data-filter="level">По уровню</button>
+              <button class="filter-btn" data-filter="coins">По монетам</button>
+            </div>
+            
+            <div class="leaderboard-list">
+              <div class="leaderboard-header">
+                <div class="rank">#</div>
+                <div class="player">Игрок</div>
+                <div class="score">Клики</div>
+                <div class="level">Уровень</div>
+              </div>
+              <div id="leaderboard-items">
+                <div class="leaderboard-loading">Загрузка лидеров...</div>
+              </div>
+            </div>
+            
+            <div class="my-rank">
+              <h4>Ваше место</h4>
+              <div id="my-rank-info">Загрузка...</div>
+            </div>
+            
+            <div class="leaderboard-stats">
+              <div class="stat">
+                <span>Всего игроков:</span>
+                <span id="total-players">0</span>
+              </div>
+              <div class="stat">
+                <span>Общее кликов:</span>
+                <span id="total-clicks">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       
-      
+      <!-- Нижняя панель вкладок -->
+      <div id="tab-bar">
+        <button class="tab-button active" data-tab="game-tab">
+          <span class="tab-icon">🎮</span>
+          <span class="tab-label">Игра</span>
+        </button>
+        <button class="tab-button" data-tab="shop-tab">
+          <span class="tab-icon">🛍️</span>
+          <span class="tab-label">Магазин</span>
+        </button>
+        <button class="tab-button" data-tab="achievements-tab">
+          <span class="tab-icon">🏆</span>
+          <span class="tab-label">Достижения</span>
+        </button>
+        <button class="tab-button" data-tab="leaderboard-tab">
+          <span class="tab-icon">📊</span>
+          <span class="tab-label">Лидеры</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="floating-text"></div>
+  <script src="script.js"></script>
+  <link rel="stylesheet" href="style.css">
 </body>
-</html>
+                  </html>
