@@ -1,225 +1,47 @@
-<!-- index.html -->
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Кликер</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-</head>
-<body>
-  <div id="container">
-    <!-- Загрузка -->
-    <div id="loading">
-      <div class="loader"></div>
-      <div>Загрузка...</div>
-    </div>
+<!-- Добавьте эту кнопку в #tab-bar -->
+<button class="tab-button" data-tab="leaderboard-tab">
+  <span class="tab-icon">📊</span>
+  <span class="tab-label">Лидеры</span>
+</button>
 
-    <!-- Основной интерфейс -->
-    <div id="main-interface" style="display: none;">
-      <!-- Верхняя панель -->
-      <div id="header">
-        <div id="level">Ур. 1</div>
-        <div id="coins">🪙 0</div>
-        <div id="clicks-count">👆 0</div>
+<!-- Добавьте эту вкладку в #main-content -->
+<div class="tab-content" id="leaderboard-tab">
+  <div class="leaderboard-section">
+    <h3>🏆 Таблица лидеров</h3>
+    
+    <div class="leaderboard-filters">
+      <button class="filter-btn active" data-filter="clicks">По кликам</button>
+      <button class="filter-btn" data-filter="level">По уровню</button>
+      <button class="filter-btn" data-filter="coins">По монетам</button>
+    </div>
+    
+    <div class="leaderboard-list">
+      <div class="leaderboard-header">
+        <div class="rank">#</div>
+        <div class="player">Игрок</div>
+        <div class="score">Клики</div>
+        <div class="level">Уровень</div>
       </div>
-      
-      <!-- Основной контент с вкладками -->
-      <div id="main-content">
-        <!-- Вкладка игры -->
-        <div class="tab-content active" id="game-tab">
-          <div id="click-counter">0</div>
-          <div id="progress-bar">
-            <div id="progress"></div>
-          </div>
-          
-          <div id="click-area">
-            <div id="click-circle">
-              <div class="circle-inner">
-                <span>КЛИКАЙ!</span>
-              </div>
-            </div>
-            <div id="click-power">+1</div>
-          </div>
-          
-          <div id="stats">
-            <div class="stat-card">
-              <div class="stat-icon">⚡</div>
-              <div class="stat-info">
-                <div class="stat-value" id="power">1</div>
-                <div class="stat-label">Сила клика</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon">🚀</div>
-              <div class="stat-info">
-                <div class="stat-value" id="cps">0</div>
-                <div class="stat-label">Кликов/сек</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Вкладка магазина -->
-        <div class="tab-content" id="shop-tab">
-          <div class="shop-section">
-            <h3>💪 Улучшения клика</h3>
-            <div class="items-grid">
-              <div class="shop-item" data-price="100" data-type="click" data-power="1">
-                <div class="item-icon">🔨</div>
-                <div class="item-info">
-                  <div class="item-name">Базовый клик</div>
-                  <div class="item-desc">+1 к силе клика</div>
-                </div>
-                <button class="buy-button">100 🪙</button>
-                <div class="item-level">Ур. <span>0</span></div>
-              </div>
-              
-              <div class="shop-item" data-price="500" data-type="click" data-power="2">
-                <div class="item-icon">⚡</div>
-                <div class="item-info">
-                  <div class="item-name">Усиленный клик</div>
-                  <div class="item-desc">+2 к силе клика</div>
-                </div>
-                <button class="buy-button">500 🪙</button>
-                <div class="item-level">Ур. <span>0</span></div>
-              </div>
-              
-              <div class="shop-item" data-price="2000" data-type="click" data-power="5">
-                <div class="item-icon">💥</div>
-                <div class="item-info">
-                  <div class="item-name">Мощный клик</div>
-                  <div class="item-desc">+5 к силе клика</div>
-                </div>
-                <button class="buy-button">2000 🪙</button>
-                <div class="item-level">Ур. <span>0</span></div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="shop-section">
-            <h3>🔄 Автокликеры</h3>
-            <div class="items-grid">
-              <div class="shop-item" data-price="300" data-type="auto" data-power="1">
-                <div class="item-icon">🤖</div>
-                <div class="item-info">
-                  <div class="item-name">Помощник</div>
-                  <div class="item-desc">1 клик/сек</div>
-                </div>
-                <button class="buy-button">300 🪙</button>
-                <div class="item-level">Ур. <span>0</span></div>
-              </div>
-              
-              <div class="shop-item" data-price="1500" data-type="auto" data-power="3">
-                <div class="item-icon">🏭</div>
-                <div class="item-info">
-                  <div class="item-name">Фабрика</div>
-                  <div class="item-desc">3 клика/сек</div>
-                </div>
-                <button class="buy-button">1500 🪙</button>
-                <div class="item-level">Ур. <span>0</span></div>
-              </div>
-              
-              <div class="shop-item" data-price="5000" data-type="auto" data-power="10">
-                <div class="item-icon">🌌</div>
-                <div class="item-info">
-                  <div class="item-name">Портал</div>
-                  <div class="item-desc">10 кликов/сек</div>
-                </div>
-                <button class="buy-button">5000 🪙</button>
-                <div class="item-level">Ур. <span>0</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Вкладка достижений -->
-        <div class="tab-content" id="achievements-tab">
-          <div class="achievements-grid">
-            <div class="achievement-card" data-target="100" data-type="clicks">
-              <div class="achievement-icon">⭐</div>
-              <div class="achievement-content">
-                <div class="achievement-name">Первый шаг</div>
-                <div class="achievement-desc">Сделайте 100 кликов</div>
-                <div class="achievement-progress">
-                  <div class="progress-bar">
-                    <div class="progress-fill"></div>
-                  </div>
-                  <div class="progress-text">0/100</div>
-                </div>
-              </div>
-              <div class="achievement-reward">+10 🪙</div>
-            </div>
-            
-            <div class="achievement-card" data-target="1000" data-type="clicks">
-              <div class="achievement-icon">🔥</div>
-              <div class="achievement-content">
-                <div class="achievement-name">Энтузиаст</div>
-                <div class="achievement-desc">Сделайте 1000 кликов</div>
-                <div class="achievement-progress">
-                  <div class="progress-bar">
-                    <div class="progress-fill"></div>
-                  </div>
-                  <div class="progress-text">0/1000</div>
-                </div>
-              </div>
-              <div class="achievement-reward">+100 🪙</div>
-            </div>
-            
-            <div class="achievement-card" data-target="5000" data-type="clicks">
-              <div class="achievement-icon">🚀</div>
-              <div class="achievement-content">
-                <div class="achievement-name">Профессионал</div>
-                <div class="achievement-desc">Сделайте 5000 кликов</div>
-                <div class="achievement-progress">
-                  <div class="progress-bar">
-                    <div class="progress-fill"></div>
-                  </div>
-                  <div class="progress-text">0/5000</div>
-                </div>
-              </div>
-              <div class="achievement-reward">+500 🪙</div>
-            </div>
-            
-            <div class="achievement-card" data-target="10" data-type="power">
-              <div class="achievement-icon">💪</div>
-              <div class="achievement-content">
-                <div class="achievement-name">Силач</div>
-                <div class="achievement-desc">Достигните 10 силы клика</div>
-                <div class="achievement-progress">
-                  <div class="progress-bar">
-                    <div class="progress-fill"></div>
-                  </div>
-                  <div class="progress-text">0/10</div>
-                </div>
-              </div>
-              <div class="achievement-reward">+200 🪙</div>
-            </div>
-          </div>
-        </div>
+      <div id="leaderboard-items">
+        <!-- Лидерборд будет загружаться динамически -->
+        <div class="leaderboard-loading">Загрузка лидеров...</div>
       </div>
-      
-      <!-- Нижняя панель вкладок -->
-      <div id="tab-bar">
-        <button class="tab-button active" data-tab="game-tab">
-          <span class="tab-icon">🎮</span>
-          <span class="tab-label">Игра</span>
-        </button>
-        <button class="tab-button" data-tab="shop-tab">
-          <span class="tab-icon">🛍️</span>
-          <span class="tab-label">Магазин</span>
-        </button>
-        <button class="tab-button" data-tab="achievements-tab">
-          <span class="tab-icon">🏆</span>
-          <span class="tab-label">Достижения</span>
-        </button>
+    </div>
+    
+    <div class="my-rank">
+      <h4>Ваше место</h4>
+      <div id="my-rank-info">Загрузка...</div>
+    </div>
+    
+    <div class="leaderboard-stats">
+      <div class="stat">
+        <span>Всего игроков:</span>
+        <span id="total-players">0</span>
+      </div>
+      <div class="stat">
+        <span>Общее кликов:</span>
+        <span id="total-clicks">0</span>
       </div>
     </div>
   </div>
-
-  <div id="floating-text"></div>
-  <script src="script.js"></script>
-  <link rel="stylesheet" href="style.css">
-</body>
-</html>
+</div>
