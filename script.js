@@ -1,12 +1,13 @@
 // Firebase configuration - ЗАМЕНИТЕ НА ВАШУ КОНФИГУРАЦИЮ
-const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "your-app-id"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyCUXW9TZ7oV4kXLEjgupYIKmdrXJAqM_aA",
+    authDomain: "suns-2264b.firebaseapp.com",
+    projectId: "suns-2264b",
+    storageBucket: "suns-2264b.firebasestorage.app",
+    messagingSenderId: "390208772280",
+    appId: "1:390208772280:web:acdaa3725fc43a2c87bc4d",
+    measurementId: "G-YV5XD309R4"
+  };
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
